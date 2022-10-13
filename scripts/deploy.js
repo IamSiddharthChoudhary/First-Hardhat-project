@@ -3,10 +3,9 @@ const { ethers, run, network } = require("hardhat")
 
 //async main()
 async function main() {
-    const simpleStorage = await ethers.getContractFactory("Lock")
+    const simpleStorage = await ethers.getContractFactory("JattData")
     console.log("Deploying contract!!")
-    const Time = parseInt(1508330494000)
-    const deployedSimpleStorage = await simpleStorage.deploy(Time)
+    const deployedSimpleStorage = await simpleStorage.deploy()
     // RPC URL and privatekey is ptovided by hardhat
     console.log(`Deployed to ${deployedSimpleStorage.address}`)
     await deployedSimpleStorage.deployed()
@@ -15,20 +14,20 @@ async function main() {
     if (network.config.chainId === 5 && process.env.ETHERSCAN_API_KEY) {
         console.log("Waiting for block conformations...")
         await deployedSimpleStorage.deployTransaction.wait(6)
+        console.log("Blocks Confirmed")
         await verify(deployedSimpleStorage.address, [])
     }
 }
 
-async function verify(contractAddress, args) {
+const verify = async (contractAddress, args) => {
     console.log("Verifying Contract")
-
     try {
         await run("verify:verify", {
             address: contractAddress,
             constructorArguments: args,
         })
     } catch (e) {
-        if (e.message.toLowerCase().includes("already exits")) {
+        if (e.message.toLowerCase().includes("already verified")) {
             console.log("Already Verified!")
         } else {
             console.log(e)
